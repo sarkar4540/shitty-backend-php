@@ -1,6 +1,9 @@
 <?php
 
 class ShittyBackendMySQL{
+	
+	//TODO: Commenting
+	
 	private $con;
 	private $temp_array=[];
 
@@ -35,7 +38,7 @@ class ShittyBackendMySQL{
 		$this->temp_array=[];
 		$res=mysqli_query($con,"SELECT * FROM `shitty_backend` WHERE `key` LIKE '{$key}%' ORDER BY `key` ASC";
 		while($row=mysqli_fetch_assoc($res)){
-			
+			//TODO: Trace tree from paths
 		}
 	}
 
@@ -44,6 +47,8 @@ class ShittyBackendMySQL{
 	}
 }	
 
+				 
+//TODO: Remove Test codes
 $sbinstance=new ShittyBackendMySQL();
 $sbinstance->eatJson('/Bond','{
     "name":{
