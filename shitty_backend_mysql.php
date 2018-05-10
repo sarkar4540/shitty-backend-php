@@ -27,35 +27,42 @@ class ShittyBackendMySQL{
 		$this->temp_array=[];
 		$this->toFilePaths($path,json_decode($value,true));
 		foreach($this->temp_array as $key=>$value){
-			mysqli_query($con,"DELETE FROM `shitty_backend` WHERE `key` LIKE '{$key}%';");
+			mysqli_query($this->con,"DELETE FROM `shitty_backend` WHERE `key` LIKE '{$key}%';");
 		}
 		foreach($this->temp_array as $key=>$value){
-			mysqli_query($con,"INSERT INTO `shitty_backend` VALUES('{$key}','{$value}');");	
+			mysqli_query($this->con,"INSERT INTO `shitty_backend` VALUES('{$key}','{$value}');");	
 		}
 	}
 
 	public function shitJSON($path){
 		$this->temp_array=[];
-		$res=mysqli_query($con,"SELECT * FROM `shitty_backend` WHERE `key` LIKE '{$key}%' ORDER BY `key` ASC";
+		$res=mysqli_query($this->con,"SELECT * FROM `shitty_backend` WHERE `key` LIKE '{$key}%' ORDER BY `key` ASC");
 		while($row=mysqli_fetch_assoc($res)){
-			//TODO: Trace tree from paths
+			$current=& $this->temp_array;
+			$pivot=strlen($path);
+			if($pivot===strlen($row["key"]))return $row["value"];
+			foreach (explode("/",substr($row['key'],$pivot+($row["key"][$pivot]==='/'?1:0))) as $node) {
+				$current=& $current[$node];
+			}
+			$current=$row["value"];
+
+
 		}
+		return json_encode($this->temp_array);
+	}
+
+	public function query($sql){
+		$res=mysqli_query($this->con,$sql);
+		if(is_bool($res)) return $res;
+		$this->temp_array=[];
+		$i=0;
+		while($row=mysqli_fetch_assoc($res))
+			$this->temp_array[$i++]=$row;
+		echo json_encode($this->temp_array);
 	}
 
 	public function getDBReady(){
-		mysqli_query($con,"CREATE TABLE `shitty_backend` (`key` varchar(255),`value` text);");
+		return mysqli_query($this->con,"CREATE TABLE `shitty_backend` (`key` varchar(255),`value` text);");
 	}
 }	
 
-				 
-//TODO: Remove Test codes
-$sbinstance=new ShittyBackendMySQL();
-$sbinstance->eatJson('/Bond','{
-    "name":{
-         "first_name":"James",
-         "last_name":"Bond"
-     },
-     "aliases":["007","Bond"],
-     "profiles":[{"0":"unknown"},"007",{"2":"secret agent"}]
-}');
-$sbinstance->printChewedResult();
